@@ -31,6 +31,13 @@ The FPGA toolchain for your board vendor.
 
 A RISC-V toolchain.
 
+# Installing `litex-amaranth-spacewire`
+
+```
+$ git submodule update --init --recursive
+$ cd litex-amaranth-spacewire && python setup.py develop --user && cd ..
+```
+
 # Building and loading
 
 Once the all the tools are in the `PATH`, then:
