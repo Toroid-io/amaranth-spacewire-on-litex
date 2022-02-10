@@ -44,6 +44,14 @@ Once the all the tools are in the `PATH`, then:
 
 `python make.py --board de0nano --build --load`
 
-# Error `gw_sh: symbol lookup error: /usr/lib/libfontconfig.so.1: undefined symbol: FT_Done_MM_Var`
+# Troubleshooting
 
-If you hit this error, you can try prefixing the build command with `LD_PRELOAD=/usr/lib/libfreetype.so`.
+## undefined symbol: FT_Done_MM_Var`
+
+If you hit the error
+
+```
+Error gw_sh: symbol lookup error: /usr/lib/libfontconfig.so.1: undefined symbol: FT_Done_MM_Var
+```
+
+you can try prefixing the build command with `LD_PRELOAD=/usr/lib/libfreetype.so`.
