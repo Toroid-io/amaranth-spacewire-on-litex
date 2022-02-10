@@ -1,0 +1,3 @@
+[submodule "litex-amaranth-spacewire"]
+	path = litex-amaranth-spacewire
+	url = git@github.com:Toroid-io/litex-amaranth-spacewire.git
