@@ -57,7 +57,7 @@ class De0Nano(Board):
 # Tang Nano 4k support ----------------------------------------------------------------------------------
 
 class TangNano4k(Board):
-    soc_kwargs = {"with_video_terminal": False, "cpu_type": "gowin_emcu", "uart_name": "serial", "l2_size" : 2048} # Use Wishbone and L2 for memory accesses.
+    soc_kwargs = {"with_video_terminal": False, "cpu_variant": "minimal", "uart_name": "serial", "l2_size" : 2048} # Use Wishbone and L2 for memory accesses.
     def __init__(self):
         from litex_boards.targets import tang_nano_4k
         Board.__init__(self, tang_nano_4k.BaseSoC, soc_capabilities={
@@ -91,6 +91,9 @@ def main():
     parser.add_argument("--load",           action="store_true",      help="Load bitstream (to SRAM)")
     parser.add_argument("--flash",          action="store_true",      help="Flash bitstream/images (to SPI Flash)")
     parser.add_argument("--doc",            action="store_true",      help="Build documentation")
+    parser.add_argument("--time-master",    action="store_true",      help="SpaceWire node is the time master")
+    parser.add_argument("--rx-tokens",      type=int, default=7,      help="Number of RX tokens (fifo size / 8)")
+    parser.add_argument("--tx-tokens",      type=int, default=7,      help="Number of TX tokens (fifo size / 8)")
     args = parser.parse_args()
 
     # Board(s) selection ---------------------------------------------------------------------------
@@ -137,7 +140,7 @@ def main():
         # SpaceWire peripheral ---------------------------------------------------------------------
         board.platform.add_extension(_spw_node_pins[board_name])
         soc.submodules.spw_node = SpWNode(soc.platform,
-                pads=soc.platform.request("spw_node"), time_master=True)
+                pads=soc.platform.request("spw_node"), time_master=args.time_master, rx_tokens=args.rx_tokens, tx_tokens=args.tx_tokens)
 
         # Build ------------------------------------------------------------------------------------
         build_dir = os.path.join("build", board_name)
