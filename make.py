@@ -44,6 +44,13 @@ class TangNano4k(Board):
         from litex_boards.targets import tang_nano_4k
         Board.__init__(self, tang_nano_4k.BaseSoC, bitstream_ext=".fs")
 
+# Tang Nano 9k support ----------------------------------------------------------------------------------
+class TangNano9k(Board):
+    soc_kwargs = {"with_video_terminal": False, "cpu_variant": "standard+debug", "l2_size" : 2048} # Use Wishbone and L2 for memory accesses.
+    def __init__(self):
+        from litex_boards.targets import tang_nano_9k
+        Board.__init__(self, tang_nano_9k.BaseSoC, bitstream_ext=".fs")
+
 #---------------------------------------------------------------------------------------------------
 # Build
 #---------------------------------------------------------------------------------------------------
@@ -53,7 +60,8 @@ supported_boards = {
     "de0nano":          De0Nano,
 
     # Gowin Semi
-    "tangnano4k":       TangNano4k
+    "tangnano4k":       TangNano4k,
+    "tangnano9k":       TangNano9k
 }
 
 def main():
@@ -121,6 +129,8 @@ def main():
     # Load FPGA bitstream ----------------------------------------------------------------------
     if args.load:
         if board_name == "tangnano4k":
+            board.load(filename=os.path.join(builder.gateware_dir, 'impl', 'pnr', 'project' + board.bitstream_ext))
+        elif board_name == "tangnano9k":
             board.load(filename=os.path.join(builder.gateware_dir, 'impl', 'pnr', 'project' + board.bitstream_ext))
         else:
             board.load(filename=os.path.join(builder.gateware_dir, soc.build_name + board.bitstream_ext))

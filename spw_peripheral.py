@@ -25,6 +25,15 @@ _spw_node_pins = {
             Subsignal("s_output", Pins("43")),
             IOStandard("LVCMOS33")
         ),
+    ],
+    "tangnano9k": [
+        ("spw_node", 0,
+            Subsignal("d_input", Pins("30")),
+            Subsignal("s_input", Pins("33")),
+            Subsignal("d_output", Pins("34")),
+            Subsignal("s_output", Pins("40")),
+            IOStandard("LVCMOS33")
+        ),
     ]
 }
 
