@@ -11,13 +11,8 @@ its repository.
 
 ## LiteX
 
-Refer to the install instructions in the LiteX repository. Once
-installed, add the [toroid](https://github.com/toroid-io/litex) remote:
-`git remote add toroid https://github.com/toroid-io/litex)` and `git
-checkout toroid/amaranth_spacewire`.
-
-This is necessary to have some handy BIOS commands for the SpaceWire
-node.
+Refer to the install instructions in the
+[LiteX](https://github.com/enjoy-digital/litex/) repository.
 
 ## Toolchain
 
@@ -29,7 +24,8 @@ The FPGA toolchain for your board vendor.
 
 ## RISC-V toolchain
 
-A RISC-V toolchain.
+A RISC-V toolchain. It can be installed at the same time that you
+install LiteX.
 
 # Installing `litex-amaranth-spacewire`
 
@@ -40,13 +36,42 @@ $ cd litex-amaranth-spacewire && python setup.py develop --user && cd ..
 
 # Building and loading
 
-Once the all the tools are in the `PATH`, then:
+## Terasic `de0nano`
 
-`python make.py --board de0nano --build --load`
+1. Add the RISCV toolchain and the FPGA toolchain to the PATH
+
+```shell
+$ export PATH=/path/to/toolchain/riscv64-unknown-elf-gcc-xxxx/bin:$PATH
+$ export PATH=/path/to/toolchain/XX.X/quartus/bin
+$ export QUARTUS_ROOTDIR=/path/to/toolchain/XX.X/quartus/bin
+```
+2. Build the bitstream
+
+```shell
+$ python make.py --board de0nano --build`
+```
+
+## SiPeed `tangnano4k`
+
+1. Add the RISCV toolchain and the FPGA toolchain to the PATH
+
+```shell
+$ export PATH=/path/to/toolchain/riscv64-unknown-elf-gcc-xxxx/bin:$PATH
+$ export PATH=/path/to/toolchain/IDE/bin:$PATH
+```
+
+2. Build the bitstream
+
+```shell
+$ python make.py --board tangnano4k --build --rx-tokens 4 --tx-tokens 4
+```
+
+The `--rx-tokens` and `--tx-tokens` flags are added to correctly fit the
+design in the FPGA.
 
 # Troubleshooting
 
-## undefined symbol: FT_Done_MM_Var`
+## undefined symbol: `FT_Done_MM_Var`
 
 If you hit the error
 
