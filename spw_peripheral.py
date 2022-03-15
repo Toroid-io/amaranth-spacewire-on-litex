@@ -11,6 +11,11 @@ _spw_node_pins = {
             Subsignal("s_output", Pins("JP1:7")),
             IOStandard("3.3-V LVTTL")
         ),
+        ("uartbone", 0,
+            Subsignal("tx", Pins("JP1:9")),
+            Subsignal("rx", Pins("JP1:13")),
+            IOStandard("3.3-V LVTTL")
+        ),
     ],
     "tangnano4k": [
         ("spw_node", 0,
