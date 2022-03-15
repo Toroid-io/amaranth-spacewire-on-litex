@@ -69,6 +69,21 @@ $ python make.py --board tangnano4k --build --rx-tokens 4 --tx-tokens 4
 The `--rx-tokens` and `--tx-tokens` flags are added to correctly fit the
 design in the FPGA.
 
+## SiPeed `tangnano9k`
+
+1. Add the RISCV toolchain and the FPGA toolchain to the PATH
+
+```shell
+$ export PATH=/path/to/toolchain/riscv64-unknown-elf-gcc-xxxx/bin:$PATH
+$ export PATH=/path/to/toolchain/IDE/bin:$PATH
+```
+
+2. Build the bitstream
+
+```shell
+$ python make.py --board tangnano9k --build
+```
+
 # Building the demo app
 
 The demo app will activate the SpaceWire IP and show the link status. It
