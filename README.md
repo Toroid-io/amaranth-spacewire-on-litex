@@ -69,6 +69,28 @@ $ python make.py --board tangnano4k --build --rx-tokens 4 --tx-tokens 4
 The `--rx-tokens` and `--tx-tokens` flags are added to correctly fit the
 design in the FPGA.
 
+# Building the demo app
+
+The demo app will activate the SpaceWire IP and show the link status. It
+can be found under the `app` directory.
+
+In order to be built you need to add the RISCV toolchain to the path,
+and export the `BUILD_DIR` variable. Assuming that this repository is
+placed in `REPO_PATH`, and that you built for the board `BOARD`, then
+you should:
+
+```shell
+$ export BUILD_DIR=REPO_PATH/build/BOARD
+```
+
+Then run `make` in the app directory. This will generate the
+`spw_app.bin` binary. It can be uploaded to your board with `litex_term`
+with the following command:
+
+```shell
+$ litex_term --kernel=spw_app.bin --serial-boot {SERIALPORT}
+```
+
 # Troubleshooting
 
 ## undefined symbol: `FT_Done_MM_Var`
