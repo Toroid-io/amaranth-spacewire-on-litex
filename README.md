@@ -7,6 +7,8 @@ core in a [LiteX](https://github.com/enjoy-digital/litex/) SoC.
 Documentation regarding the `amaranth-spacewire` core can be found in
 its repository.
 
+![alt text](https://github.com/Toroid-io/demo_spw.gif "SpaceWire Demo")
+
 # Requirements
 
 ## LiteX
@@ -86,6 +88,8 @@ $ python make.py --board tangnano9k --build
 
 # Building the demo app
 
+**Note**: The C demo is deprecated in favor of the Rust application.
+
 The demo app will activate the SpaceWire IP and show the link status. It
 can be found under the `app` directory.
 
@@ -98,13 +102,27 @@ you should:
 $ export BUILD_DIR=REPO_PATH/build/BOARD
 ```
 
-Then run `make` in the app directory. This will generate the
+## C application
+
+Then run `make` in the `app-c` directory. This will generate the
 `spw_app.bin` binary. It can be uploaded to your board with `litex_term`
 with the following command:
 
 ```shell
 $ litex_term --kernel=spw_app.bin --serial-boot {SERIALPORT}
 ```
+
+## Rust application
+
+To build the rust application you must first build the target for your board
+(see above). Then you can run `cargo build` in the `app-rs` directory or execute
+one of the make targets available (e.g. `make tangnano9k_app`.
+
+Executing the application (loading it to the target) can be done running the
+`cargo run -- /dev/ttyUSBX` command from the `app-rs` directory.
+
+**Note**: You may need to adjust the `SYSTEM_CLOCK_FREQUENCY` constant to match
+your target.
 
 # Troubleshooting
 

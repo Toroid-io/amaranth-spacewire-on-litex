@@ -36,14 +36,13 @@ int main(int argc, char* argv[])
 
 	printf("Initializing SpaceWire core...\n");
 	spw_node_control_link_error_clear_write(1);
-	spw_node_control_link_autorecover_write(1);
 	spw_node_control_link_start_write(1);
 
 	printf("Waiting link to be ready...\n");
 
 	while(1) {
 		printf("Status:\n");
-		link_error = spw_node_status_link_error_read();
+		link_error = spw_node_status_link_error_flags_read();
 		printf("\tLink error:\t\t%s\n", link_error ? "yes" : "no");
 		link_state = spw_node_status_link_state_read();
 		printf("\tLink state:\t\t%s\n", link_state_mapping[link_state]);

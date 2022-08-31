@@ -1,0 +1,17 @@
+[package]
+name = "app-rs"
+version = "0.1.0"
+edition = "2021"
+authors = ["Andrés MANELLI <am@toroid.io>"]
+repository = "https://github.com/Toroid-io/amaranth-spacewire-on-litex"
+
+[dependencies]
+pac = { path = "../pac" }
+spacewire-rs = { path = "../spacewire-rs" }
+riscv-rt = "0.9.0"
+panic-halt = "0.2"
+
+[profile.release]
+# Improve code generation
+lto = true
+codegen-units = 1

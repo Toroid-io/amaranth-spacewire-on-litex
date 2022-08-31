@@ -6,7 +6,7 @@ TARGET = spw_app
 
 #Set compiler/linker flags
 CXXFLAGS += -I.
-OBJECTS = spw_app.o isr.o crt0.o
+OBJECTS = spw_app.o crt0.o
 
 ###############################################################
 
