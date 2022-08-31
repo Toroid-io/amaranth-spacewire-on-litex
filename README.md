@@ -7,7 +7,7 @@ core in a [LiteX](https://github.com/enjoy-digital/litex/) SoC.
 Documentation regarding the `amaranth-spacewire` core can be found in
 its repository.
 
-![alt text](https://github.com/Toroid-io/demo_spw.gif "SpaceWire Demo")
+![Demo](https://github.com/Toroid-io/amaranth-spacewire-on-litex/blob/main/demo_spw.gif "SpaceWire Demo")
 
 # Requirements
 
