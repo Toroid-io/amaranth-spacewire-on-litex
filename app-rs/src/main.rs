@@ -103,7 +103,6 @@ fn main() -> ! {
     let mut timer = Timer::new(peripherals.TIMER0);
 
     let ll = AmaranthSpw::new(peripherals.SPW_NODE);
-    let _mib = MIB::new(&ll);
     let dll = DataLink::new(&ll);
 
     dll.set_link_start(true).unwrap();
