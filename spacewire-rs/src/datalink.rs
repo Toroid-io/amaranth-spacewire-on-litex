@@ -6,7 +6,7 @@ pub struct LinkCredit {
     pub rx: u8
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum LinkState {
     ErrorReset,
     ErrorWait,
@@ -22,6 +22,7 @@ pub struct LinkError {
     pub parity: bool,
     pub escape: bool,
     pub credit: bool,
+    pub disabled: bool,
 }
 
 impl LinkError {
@@ -40,19 +41,16 @@ pub enum DataLinkLayerError {
     Error
 }
 
-pub struct DataLink<'a> {
-    ll: &'a dyn LowLevelAccess
+pub struct DataLink<'a, T: LowLevelAccess> {
+    ll: &'a T
 }
 
-impl<'a> DataLink<'a> {
-    pub fn new(ll: &'a dyn LowLevelAccess) -> Self {
+impl<'a, T> DataLink<'a, T>
+where T: LowLevelAccess {
+    pub fn new(ll: &'a T) -> Self {
         DataLink {
             ll
         }
-    }
-    
-    pub fn port_reset(&self) -> Result<(), DataLinkLayerError> {
-        self.ll.port_reset()
     }
     
     pub fn set_link_disabled(&self, state: bool) -> Result<(), DataLinkLayerError> {

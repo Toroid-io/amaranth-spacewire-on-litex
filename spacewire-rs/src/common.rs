@@ -1,7 +1,6 @@
 use crate::datalink::*;
 
 pub trait LowLevelAccess {
-    fn port_reset(&self) -> Result<(), DataLinkLayerError>;
     fn set_link_disabled(&self, disabled: bool) -> Result<(), DataLinkLayerError>;
     fn get_link_disabled(&self) -> Result<bool, DataLinkLayerError>;
     fn get_link_start(&self) -> Result<bool, DataLinkLayerError>;

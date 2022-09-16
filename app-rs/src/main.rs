@@ -12,6 +12,27 @@ use timer::Timer;
 
 use spacewire_rs::common::*;
 use spacewire_rs::datalink::*;
+use spacewire_rs::mib::*;
+
+const NCHAR_EEP: u16 = 0x101;
+const NCHAR_EOP: u16 = 0x102;
+
+#[derive(Debug)]
+enum NChar {
+    EOP,
+    EEP,
+    DATA(u8)
+}
+
+impl NChar {
+    fn value(&self) -> u16 {
+        match *self {
+            NChar::EOP => NCHAR_EOP,
+            NChar::EEP => NCHAR_EEP,
+            NChar::DATA(v) => v as u16
+        }
+    }
+}
 
 struct AmaranthSpw {
     core: pac::SPW_NODE,
@@ -22,10 +43,26 @@ impl AmaranthSpw {
         AmaranthSpw { core }
     }
 
-    fn link_error_clear(&self) {
-        self.core
-            .control
-            .modify(|_, w| w.link_error_clear().bit(true));
+    pub fn data_available(&self) -> Result<bool, DataLinkLayerError> {
+        Ok(self.core.status.read().read_ready().bit())
+    }
+
+    pub fn read(&self) -> Result<NChar, DataLinkLayerError> {
+        let nchar = self.core.fifo_r.read().data().bits();
+        match nchar {
+            NCHAR_EOP => Ok(NChar::EOP),
+            NCHAR_EEP => Ok(NChar::EEP),
+            _ => Ok(NChar::DATA(nchar as u8))
+        }
+    }
+
+    pub fn write_ready(&self) -> Result<bool, DataLinkLayerError> {
+        Ok(self.core.status.read().write_ready().bit())
+    }
+
+    pub fn write(&self, data: NChar) -> Result<(), DataLinkLayerError> {
+        self.core.fifo_w.write(|w| unsafe { w.data().bits(data.value()) } );
+        Ok(())
     }
 }
 
@@ -60,14 +97,8 @@ impl LowLevelAccess for AmaranthSpw {
         Ok(self.core.control.read().auto_start().bit())
     }
 
-    fn port_reset(&self) -> Result<(), DataLinkLayerError> {
-        Ok(self.core.control.modify(|_, w| w.soft_reset().bit(true)))
-    }
-
     fn set_link_disabled(&self, disabled: bool) -> Result<(), DataLinkLayerError> {
-        self.core
-            .control
-            .modify(|_, w| w.link_disabled().bit(disabled));
+        self.core.control.modify(|_, w| w.link_disabled().bit(disabled));
         Ok(())
     }
 
@@ -78,10 +109,11 @@ impl LowLevelAccess for AmaranthSpw {
     fn get_link_error_flags(&self) -> Result<LinkError, DataLinkLayerError> {
         let bits = self.core.status.read().link_error_flags().bits();
         Ok(LinkError {
-            disconnect: (bits >> 0) != 0,
-            parity: (bits >> 1) != 0,
-            escape: (bits >> 2) != 0,
-            credit: (bits >> 3) != 0,
+            disconnect: ((bits >> 0) & 0b1) != 0,
+            parity:     ((bits >> 1) & 0b1) != 0,
+            escape:     ((bits >> 2) & 0b1) != 0,
+            credit:     ((bits >> 3) & 0b1) != 0,
+            disabled:   ((bits >> 4) & 0b1) != 0,
         })
     }
 
@@ -103,6 +135,7 @@ fn main() -> ! {
     let mut timer = Timer::new(peripherals.TIMER0);
 
     let ll = AmaranthSpw::new(peripherals.SPW_NODE);
+    let _mib = MIB::new(&ll);
     let dll = DataLink::new(&ll);
 
     dll.set_link_start(true).unwrap();
@@ -114,11 +147,34 @@ fn main() -> ! {
         let credit = dll.get_link_credit().unwrap();
         println!("Credit: {:?}", credit);
 
+        let message = "Hello!";
+        if ll.write_ready().unwrap() {
+            for c in message.bytes() {
+                while !ll.write_ready().unwrap() { msleep(&mut timer, 1); }
+                ll.write(NChar::DATA(c)).unwrap();
+            }
+            while !ll.write_ready().unwrap() { msleep(&mut timer, 1); }
+            ll.write(NChar::EOP).unwrap();
+        }
+
+        if ll.data_available().unwrap() {
+            print!("Received data: ");
+
+            while ll.data_available().unwrap() {
+                match ll.read().unwrap() {
+                    NChar::EOP => print!(" EOP "),
+                    NChar::EEP => print!(" EEP "),
+                    NChar::DATA(v) => print!("{}", v as char),
+                }
+            }
+
+            println!("\n");
+        }
+
         let errors = dll.get_link_error_flags().unwrap();
 
-        if errors.any() {
+        if errors.any() && state != LinkState::Run {
             println!("Link error: {:?}", errors);
-            ll.link_error_clear();
         }
 
         msleep(&mut timer, 1000);

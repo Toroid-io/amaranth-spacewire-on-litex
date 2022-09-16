@@ -69,46 +69,38 @@ supported_boards = {
 
 def add_spw(args, soc):
     soc.platform.add_extension(_spw_node_pins[args.board])
-    
+
     if args.lvds:
         class Object(object):
             pass
 
         spw_signals = Object()
-        spw_signals.d_input = Signal()
-        spw_signals.d_output = Signal()
-        spw_signals.s_input = Signal()
-        spw_signals.s_output = Signal()
+
+        spw_signals.data_input = Signal()
+        spw_signals.data_output = Signal()
+        spw_signals.strobe_input = Signal()
+        spw_signals.strobe_output = Signal()
 
         lvds = soc.platform.request("spw_node_lvds")
 
-        soc.specials += DifferentialInput(lvds.d_input_p, lvds.d_input_n, spw_signals.d_input)
-        soc.specials += DifferentialInput(lvds.s_input_p, lvds.s_input_n, spw_signals.s_input)
-        soc.specials += DifferentialOutput(spw_signals.d_output, lvds.d_output_p, lvds.d_output_n)
-        soc.specials += DifferentialOutput(spw_signals.s_output, lvds.s_output_p, lvds.s_output_n)
+        soc.specials += DifferentialInput(lvds.data_input_p, lvds.data_input_n, spw_signals.data_input)
+        soc.specials += DifferentialInput(lvds.strobe_input_p, lvds.strobe_input_n, spw_signals.strobe_input)
+        soc.specials += DifferentialOutput(spw_signals.data_output, lvds.data_output_p, lvds.data_output_n)
+        soc.specials += DifferentialOutput(spw_signals.strobe_output, lvds.strobe_output_p, lvds.strobe_output_n)
 
-        soc.submodules.spw_node = SpWNode(soc.platform,
-                pads=spw_signals,
-                src_freq=int(float(args.sys_clk_freq)),
-                reset_freq=int(float(args.reset_freq)),
-                user_freq=int(float(args.user_freq)),
-                time_master=args.time_master,
-                rx_tokens=args.rx_tokens,
-                tx_tokens=args.tx_tokens)
     else:
-        soc.submodules.spw_node = SpWNode(soc.platform,
-                pads=soc.platform.request("spw_node_se"),
-                src_freq=int(float(args.sys_clk_freq)),
-                reset_freq=int(float(args.reset_freq)),
-                user_freq=int(float(args.user_freq)),
-                time_master=args.time_master,
-                rx_tokens=args.rx_tokens,
-                tx_tokens=args.tx_tokens)
+        spw_signals = soc.platform.request("spw_node_se")
+
+    soc.submodules.spw_node = SpWNode(soc.platform,
+            pads=spw_signals,
+            src_freq=int(float(args.sys_clk_freq)),
+            reset_freq=int(float(args.reset_freq)),
+            tx_freq=int(float(args.tx_freq)))
 
 
 def de0nano_main(parser, target_group, soc_kwargs, builder_kwargs):
     args = parser.parse_args()
-    
+
     board = De0Nano()
 
     soc = board.soc_cls(**soc_kwargs)
@@ -150,7 +142,7 @@ def tangnano9k_main(parser, target_group, soc_kwargs, builder_kwargs):
     soc_kwargs["bios_flash_offset"] = int(args.bios_flash_offset, 0)
     soc_kwargs["with_video_terminal"] = args.with_video_terminal
     soc = board.soc_cls(**soc_kwargs)
-    
+
     if args.with_uartbone:
         soc.add_uartbone(name="uartbone")
 
@@ -195,15 +187,13 @@ if __name__ == "__main__":
     parser = LiteXSoCArgumentParser(description=description)
 
     spw_group = parser.add_argument_group(title="SpaceWire options")
-    spw_group.add_argument("--board",           required=True,            help="FPGA board")
-    spw_group.add_argument("--time-master",     action="store_true",      help="SpaceWire node is the time master")
-    spw_group.add_argument("--rx-tokens",       type=int, default=7,      help="Number of RX tokens (fifo size / 8)")
-    spw_group.add_argument("--tx-tokens",       type=int, default=7,      help="Number of TX tokens (fifo size / 8)")
-    spw_group.add_argument("--with-uartbone",   action="store_true",      help="Add UARTBone to the board")
-    spw_group.add_argument("--with-jtagbone",   action="store_true",      help="Add JTAGBone to the board")
-    spw_group.add_argument("--reset-freq",      default=10e6,             help="Reset frequency.")
-    spw_group.add_argument("--user-freq",       default=10e6,             help="User frequency.")
-    spw_group.add_argument("--lvds",            action="store_true",      help="Use LVDS outputs")
+    spw_group.add_argument("--board",               required=True,            help="FPGA board")
+    spw_group.add_argument("--with-uartbone",       action="store_true",      help="Add UARTBone to the board")
+    spw_group.add_argument("--with-jtagbone",       action="store_true",      help="Add JTAGBone to the board")
+    spw_group.add_argument("--reset-freq",          default=10e6,             help="Reset frequency.")
+    spw_group.add_argument("--tx-freq",             default=10e6,             help="Transmit frequency.")
+    spw_group.add_argument("--fifo-depth-tokens",   default=7,                help="Depth of FIFOs (in tokens)")
+    spw_group.add_argument("--lvds",                action="store_true",      help="Use LVDS outputs")
 
     target_group = parser.add_argument_group(title="Target options")
     target_group.add_argument("--build",                action="store_true",      help="Build design.")
